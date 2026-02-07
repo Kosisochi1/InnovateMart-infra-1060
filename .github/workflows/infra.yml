@@ -166,6 +166,7 @@ jobs:
       - name: Terraform Init
         working-directory: terraform
         run: | 
+         terraform state rm kubernetes_namespace.retail
          terraform init --upgrade
          terraform init
 
