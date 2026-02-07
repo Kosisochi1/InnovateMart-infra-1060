@@ -149,6 +149,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Helm login to GHCR
+        run: |
+          echo "${{ secrets.TOKEN_GHCR }}" \
+          | helm registry login ghcr.io \
+            -u ${{ github.actor }} \
+            --password-stdin
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
       - name: Terraform Init
         working-directory: terraform
         run: terraform init
