@@ -45,7 +45,7 @@ jobs:
 
       - name: Helm login to GHCR
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" \
+          echo "${{ secrets.TOKEN_GHCR }}" \
           | helm registry login ghcr.io \
             -u ${{ github.actor }} \
             --password-stdin
@@ -96,7 +96,7 @@ jobs:
 
       - name: Helm login to GHCR
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" \
+          echo "${{ secrets.TOKEN_GHCR }}" \
           | helm registry login ghcr.io \
             -u ${{ github.actor }} \
             --password-stdin
