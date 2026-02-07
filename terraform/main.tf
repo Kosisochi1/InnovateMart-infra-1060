@@ -1,5 +1,5 @@
 #############################################
-#     Bedrock Project
+#     Bedrock Project ..
 #############################################
 
 #############################################
@@ -408,3 +408,4 @@ output "vpc_id" {
 output "assets_bucket_name" {
   value = aws_s3_bucket.assets.bucket
 }
+
