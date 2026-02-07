@@ -1,4 +1,4 @@
-name: Starttech-Infrastructure
+name: Bedrock-Infrastructure
 
 on:
   pull_request: 
@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       destroy:
-        description: "⚠️ Set to true to DESTROY Starttech infrastructure"
+        description: "⚠️ Set to true to DESTROY Bedrock infrastructure"
         required: true
         default: "false"
         type: choice
@@ -124,14 +124,14 @@ jobs:
 
 
   terraform-destroy:
-    name: Terraform Destroy (Starttech-Infrastructure)
+    name: Terraform Destroy (Bedrock-Infrastructure)
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.destroy == 'true'
 
     steps:
       - name: ⚠️ Confirm destroy intent
         run: |
-          echo "🚨 DESTROYING Starttech Infrastructure"
+          echo "🚨 DESTROYING Bedrock Infrastructure"
           echo "This action is irreversible."
 
       - name: Checkout code
