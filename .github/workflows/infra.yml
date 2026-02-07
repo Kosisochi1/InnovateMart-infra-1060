@@ -115,7 +115,7 @@ jobs:
         run: terraform output -json > outputs.json
 
       - name: Display outputs
-        working-directory: starttech-infra/terraform
+        working-directory: terraform
         run: |
           echo "📋 Infrastructure Outputs:"
           terraform output
