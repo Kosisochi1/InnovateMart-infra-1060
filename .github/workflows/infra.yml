@@ -165,7 +165,9 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init
+        run: | 
+         terraform init --upgrade
+         terraform init
 
       - name: Terraform Destroy
         working-directory: terraform
