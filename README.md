@@ -27,24 +27,83 @@ The solution consists of:
 
 * GitHub Actions CI/CD pipeline
 
-High-Level Architecture
+## Architecture
+
 ```
-Internet
-    │
-    ▼
-Application Load Balancer (HTTPS / ACM TLS)
-    │
-Kubernetes Ingress (EKS)
-    │
-Retail Store Microservices (Pods)
-    │
-CloudWatch Logs
+ ┌──────────────────────────────────────────────────────────────────────┐
+
+ │                               INTERNET                               │
+
+ └───────────────────────────────┬──────────────────────────────────────┘
+                                 │ HTTPS (TLS via ACM)
+                                 ▼
+                  ┌──────────────────────────────────┐
+                  │        Application Load Balancer  │
+                  │   (AWS Load Balancer Controller)  │
+                  └───────────────┬───────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         VPC: project-bedrock-vpc                    │
+│                              (10.0.0.0/16)                          │
+│                                                                     │
+│  ┌───────────────────────────────┐   ┌──────────────────────────────┐ 
+│  │        Public Subnet AZ-1     │   │       Public Subnet AZ-2      
+│  │                               │   │                              │ 
+│  │   ALB ENI                     │   │   ALB ENI                    │ 
+│  └───────────────┬──────────────┘    └──────────────┬───────────────┘ 
+│                  │                                 │                │
+│                  ▼                                 ▼                │
+│        ┌──────────────────────────────────────────────────────┐     │
+│        │                 Amazon EKS Cluster                   │     │
+│        │              project-bedrock-cluster                 │     │
+│        │                                                      │     │
+│        │  ┌──────────────────────────────────────────────┐    │     │
+│        │  │        Private Subnet AZ-1                   │    │     │
+│        │  │                                              │    │     │
+│        │  │   ┌────────────────────────────────────┐     │    │     │
+│        │  │   │ EKS Managed Node Group             │     │    │     │
+│        │  │   │                                    │     │    │     │
+│        │  │   │  Retail Store Pods                 │     │    │     │
+│        │  │   │  - ui                              │     │    │     │
+│        │  │   │  - catalog                         │     │    │     │
+│        │  │   │  - carts                           │     │    │     │
+│        │  │   │  - checkout                        │     │    │     │
+│        │  │   │  - redis / rabbitmq / db pods      │     │    │     │
+│        │  │   └────────────────────────────────────┘     │    │     │
+│        │  └──────────────────────────────────────────────┘    │     │
+│        │                                                      │     │
+│        │  ┌──────────────────────────────────────────────┐    │     │
+│        │  │        Private Subnet AZ-2                   │    │     │
+│        │  │      Additional worker nodes                 │    │     │
+│        │  └──────────────────────────────────────────────┘    │     │
+│        └──────────────────────────────────────────────────────┘     │
+│                                                                     │
+│                         NAT Gateway (Outbound Internet)             │
+└─────────────────────────────────────────────────────────────────────┘
+
+
+                ┌─────────────────────────────────────┐
+                │         Amazon S3                   │
+                │   bedrock-assets-1060               │
+                │   (Private Bucket)                  │
+                └──────────────┬──────────────────────┘
+                               │ ObjectCreated Event
+                               ▼
+                    ┌──────────────────────────────┐
+                    │   AWS Lambda                 │
+                    │ bedrock-asset-processor      │
+                    │ (Node.js Runtime)            │
+                    └──────────────┬───────────────┘
+                                   │
+                                   ▼
+                         ┌──────────────────────┐
+                         │   CloudWatch Logs    │
+                         │  (Lambda + EKS Logs) │
+                         └──────────────────────┘
 
 ```
 
-```
-S3 Bucket ───► Lambda (Asset Processor) ───► CloudWatch Logs
-```
 
 ## 🧰 Technology Stack
 
@@ -225,25 +284,34 @@ GitHub Actions automates infrastructure deployment.
 | Merge to main | terraform apply |
 
 
-Security:
+### Security:
 
-AWS credentials stored as GitHub Secrets
+* AWS credentials stored as GitHub Secrets
 
-No credentials hardcoded in repository
+* No credentials hardcoded in repository
 
-🚀 Deployment Steps
+## 🚀 Deployment Steps
+
 1. Initialize Terraform
+```
 terraform init
+```
 
-2. Plan Infrastructure
+3. Plan Infrastructure
+```
 terraform plan
 
-3. Apply Infrastructure
+```
+4. Apply Infrastructure
+
+```
 terraform apply
 
-🌐 Accessing the Application
+```
 
-After deployment:
+## 🌐 Accessing the Application
+
+#### After deployment:
 
 terraform output retail_ingress_address
 
@@ -252,32 +320,41 @@ Open in browser:
 
 https://<alb-dns-name>
 
-📁 Repository Structure
+## 📁 Repository Structure
+
 project-bedrock/
 │
+
 ├── main.tf
+
 ├── variables.tf
+
 ├── outputs.tf
+
 ├── lambda/
+
 │   └── index.js
+
 ├── helm/
+
 └── .github/workflows/
 
-✅ Project Outcomes
 
-Fully automated AWS infrastructure
+## ✅ Project Outcomes
 
-Production-ready Kubernetes environment
+✔ Fully automated AWS infrastructure
 
-Secure developer access
+✔ Production-ready Kubernetes environment
 
-Centralized logging and observability
+✔ Secure developer access
 
-Event-driven serverless integration
+✔ Centralized logging and observability
 
-CI/CD-enabled infrastructure lifecycle
+✔ Event-driven serverless integration
 
-👨‍💻 Author
+✔ CI/CD-enabled infrastructure lifecycle
 
-Cloud DevOps Engineer – InnovateMart Inc.
-Project: Bedrock Deployment
+## 👨‍💻 Author
+
+EZEOYIRI EMMANUEL . K.
+
