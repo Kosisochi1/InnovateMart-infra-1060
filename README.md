@@ -292,17 +292,31 @@ GitHub Actions automates infrastructure deployment.
 
 ## 🚀 Deployment Steps
 
-1. Initialize Terraform
+1. Clone Repo
+```
+git clone repo
+
+cd terraform
+```
+
+2. Login to GHCR from the terminal for helm chart pulling
+
+```
+helm registry login ghcr.io  --username <username>  --password <token>
+
+```
+
+3. Initialize Terraform
 ```
 terraform init
 ```
 
-3. Plan Infrastructure
+4. Plan Infrastructure
 ```
 terraform plan
 
 ```
-4. Apply Infrastructure
+5. Apply Infrastructure
 
 ```
 terraform apply
