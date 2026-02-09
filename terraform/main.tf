@@ -188,7 +188,7 @@ resource "helm_release" "retail_store" {
 
 
   # chart   = "oci://ghcr.io/kosisochi1/charts/retail-store"
-  chart   = "../../retail-store"
+  chart   = "../retail-store"
   version = "0.1.0"
 
 
