@@ -7,7 +7,7 @@
   "cluster_endpoint": {
     "sensitive": false,
     "type": "string",
-    "value": "https://5A7FE105A3C78E1B4124C3C1CDF74A71.gr7.us-east-1.eks.amazonaws.com"
+    "value": "https://15D7C1E15831B7A6877514F53FB78D90.gr7.us-east-1.eks.amazonaws.com"
   },
   "cluster_name": {
     "sensitive": false,
@@ -17,8 +17,8 @@
   "ingress": {
     "sensitive": false,
     "type": "string",
-    "value": "k8s-retailap-retailui-dd768ff5c0-1628588182.us-east-1.elb.amazonaws.com"
-  },
+    "value": "k8s-retailap-retailui-dd768ff5c0-92203724.us-east-1.elb.amazonaws.com"
+  },                    
   "region": {
     "sensitive": false,
     "type": "string",
@@ -27,6 +27,6 @@
   "vpc_id": {
     "sensitive": false,
     "type": "string",
-    "value": "vpc-03a181afb45972a58"
+    "value": "vpc-09e5957520fedd500"
   }
 }
