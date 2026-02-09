@@ -43,12 +43,12 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
-      - name: Helm login to GHCR
-        run: |
-          echo "${{ secrets.TOKEN_GHCR }}" \
-          | helm registry login ghcr.io \
-            -u ${{ github.actor }} \
-            --password-stdin
+      # - name: Helm login to GHCR
+      #   run: |
+      #     echo "${{ secrets.TOKEN_GHCR }}" \
+      #     | helm registry login ghcr.io \
+      #       -u ${{ github.actor }} \
+      #       --password-stdin
 
       - name: Terraform Init
         working-directory: terraform
@@ -94,12 +94,12 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
-      - name: Helm login to GHCR
-        run: |
-          echo "${{ secrets.TOKEN_GHCR }}" \
-          | helm registry login ghcr.io \
-            -u ${{ github.actor }} \
-            --password-stdin
+      # - name: Helm login to GHCR
+      #   run: |
+      #     echo "${{ secrets.TOKEN_GHCR }}" \
+      #     | helm registry login ghcr.io \
+      #       -u ${{ github.actor }} \
+      #       --password-stdin
 
       - name: Terraform Init
         working-directory: terraform
@@ -152,12 +152,12 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
-      - name: Helm login to GHCR
-        run: |
-          echo "${{ secrets.TOKEN_GHCR }}" \
-          | helm registry login ghcr.io \
-            -u ${{ github.actor }} \
-            --password-stdin
+      # - name: Helm login to GHCR
+      #   run: |
+      #     echo "${{ secrets.TOKEN_GHCR }}" \
+      #     | helm registry login ghcr.io \
+      #       -u ${{ github.actor }} \
+      #       --password-stdin
 
       - name: Terraform Init
         working-directory: terraform
@@ -172,4 +172,4 @@ jobs:
 
       - name: Terraform Destroy
         working-directory: terraform
-        run: terraform destroy --auto-approve
+        run: ../script/destroy_tf.sh
