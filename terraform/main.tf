@@ -56,8 +56,21 @@ module "vpc" {
   enable_nat_gateway = true
   single_nat_gateway = true
 
+
+
+
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = "1"
+    Project                  = "barakat-2025-capstone"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = "1"
+    Project                           = "barakat-2025-capstone"
+  }
+
   tags = {
-    Project = "Bedrock"
+    Project = "barakat-2025-capstone"
   }
 }
 
@@ -78,7 +91,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      desired_size = 2
+      desired_size = 3
       min_size     = 2
       max_size     = 4
 
@@ -100,7 +113,7 @@ module "eks" {
   ]
 
   tags = {
-    Project = "Bedrock"
+    Project = "barakat-2025-capstone"
   }
 }
 
@@ -174,13 +187,179 @@ resource "helm_release" "retail_store" {
   namespace = kubernetes_namespace.retail.metadata[0].name
 
 
-  chart   = "oci://ghcr.io/kosisochi1/charts/retail-store"
+  # chart   = "oci://ghcr.io/kosisochi1/charts/retail-store"
+  chart   = "../../retail-store"
   version = "0.1.0"
 
 
   depends_on = [kubernetes_namespace.retail]
 
+
+
 }
+
+
+
+
+
+
+############################################
+# IAM Role for ALB Controller 
+############################################
+# resource "aws_iam_role" "alb_controller" {
+#   name = "bedrock-alb-controller"
+
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Effect    = "Allow"
+#       Principal = { Service = "eks.amazonaws.com" }
+#       Action    = "sts:AssumeRole"
+#     }]
+#   })
+
+#   tags = { Project = "Bedrock" }
+# }
+
+data "aws_caller_identity" "current" {}
+
+resource "aws_iam_role" "alb_controller" {
+  name = "bedrock-alb-controller"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Federated = module.eks.oidc_provider_arn
+      }
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        }
+      }
+    }]
+  })
+
+  tags = {
+    Project = "barakat-2025-capstone"
+  }
+}
+
+
+
+
+# resource "aws_iam_role_policy_attachment" "alb_controller" {
+#   role       = aws_iam_role.alb_controller.name
+#   policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+# }
+
+
+resource "aws_iam_policy" "alb_controller" {
+  name   = "AWSLoadBalancerControllerIAMPolicy"
+  policy = file("${path.module}/alb-policy.json")
+
+  tags = {
+    Project = "barakat-2025-capstone"
+  }
+}
+
+
+resource "aws_iam_role_policy_attachment" "alb_controller" {
+  role       = aws_iam_role.alb_controller.name
+  policy_arn = aws_iam_policy.alb_controller.arn
+}
+
+
+
+
+#############################################
+# Helm Install AWS Load balancer Controller
+#############################################
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+
+  set = [{
+    name  = "clusterName"
+    value = module.eks.cluster_name
+    },
+
+    {
+      name  = "region"
+      value = "us-east-1"
+    },
+
+    {
+      name  = "vpcId"
+      value = module.vpc.vpc_id
+    },
+
+    {
+      name  = "serviceAccount.create"
+      value = "true"
+    },
+
+    {
+      name  = "serviceAccount.name"
+      value = "aws-load-balancer-controller"
+    },
+
+    {
+      name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+      value = aws_iam_role.alb_controller.arn
+    }
+  ]
+
+  depends_on = [module.eks]
+
+
+
+}
+
+#############################################
+# Kubernates Ingress for UI
+#############################################
+resource "kubernetes_ingress_v1" "retail_ui" {
+  metadata {
+    name      = "retail-ui-ingress"
+    namespace = "retail-app"
+
+    annotations = {
+      "kubernetes.io/ingress.class"            = "alb"
+      "alb.ingress.kubernetes.io/scheme"       = "internet-facing"
+      "alb.ingress.kubernetes.io/target-type"  = "ip"
+      "alb.ingress.kubernetes.io/listen-ports" = "[{\"HTTP\":80}]"
+    }
+  }
+
+  spec {
+    rule {
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+
+          backend {
+            service {
+              name = "ui"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  depends_on = [helm_release.aws_load_balancer_controller, helm_release.retail_store]
+}
+
+
 
 #############################################
 # 7. IAM User – bedrock-dev-view
@@ -191,6 +370,11 @@ resource "aws_eks_access_entry" "kosi_admin" {
   cluster_name  = module.eks.cluster_name
   principal_arn = "arn:aws:iam::710271940761:user/Kosi_user"
   type          = "STANDARD"
+
+
+  tags = {
+    project = "barakat-2025-capstone"
+  }
 }
 
 resource "aws_eks_access_policy_association" "kosi_admin" {
@@ -201,11 +385,12 @@ resource "aws_eks_access_policy_association" "kosi_admin" {
   access_scope {
     type = "cluster"
   }
+
 }
 
 resource "aws_iam_user" "dev_view" {
   name = "bedrock-dev-view"
-  tags = { Project = "Bedrock" }
+  tags = { Project = "barakat-2025-capstone" }
 }
 
 resource "aws_iam_user_policy_attachment" "readonly" {
@@ -215,6 +400,7 @@ resource "aws_iam_user_policy_attachment" "readonly" {
 
 resource "aws_iam_access_key" "dev_view" {
   user = aws_iam_user.dev_view.name
+
 }
 
 #############################################
@@ -227,6 +413,9 @@ resource "aws_eks_access_entry" "dev_view" {
   cluster_name  = module.eks.cluster_name
   principal_arn = aws_iam_user.dev_view.arn
   type          = "STANDARD"
+  tags = {
+    project = "barakat-2025-capstone"
+  }
 }
 
 resource "aws_eks_access_policy_association" "dev_view" {
@@ -237,6 +426,7 @@ resource "aws_eks_access_policy_association" "dev_view" {
   access_scope {
     type = "cluster"
   }
+
 }
 resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
   role       = module.eks.eks_managed_node_groups["default"].iam_role_name
@@ -272,6 +462,8 @@ resource "aws_eks_addon" "cw_observability" {
     create = "30m"
     update = "30m"
   }
+
+  tags = { project = "barakat-2025-capstone" }
 }
 
 #############################################
@@ -281,7 +473,7 @@ resource "aws_s3_bucket" "assets" {
   bucket = "bedrock-assets-1060"
 
   tags = {
-    Project = "Bedrock"
+    Project = "barakat-2025-capstone"
   }
 }
 
@@ -314,6 +506,9 @@ resource "aws_iam_policy" "dev_s3_write" {
       }
     ]
   })
+
+
+  tags = { Project = "barakat-2025-capstone" }
 }
 
 
@@ -339,7 +534,7 @@ resource "aws_iam_role" "lambda_role" {
     }]
   })
 
-  tags = { Project = "Bedrock" }
+  tags = { Project = "barakat-2025-capstone" }
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
@@ -359,7 +554,7 @@ resource "aws_lambda_function" "processor" {
   source_code_hash = filebase64sha256("lambda.zip")
 
 
-  tags = { Project = "Bedrock" }
+  tags = { Project = "barakat-2025-capstone" }
 }
 
 
@@ -373,6 +568,7 @@ resource "aws_lambda_permission" "allow_s3" {
   function_name = aws_lambda_function.processor.function_name
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.assets.arn
+
 }
 
 resource "aws_s3_bucket_notification" "trigger" {
@@ -407,4 +603,11 @@ output "vpc_id" {
 
 output "assets_bucket_name" {
   value = aws_s3_bucket.assets.bucket
+}
+
+
+output "ingress" {
+
+  value = try(kubernetes_ingress_v1.retail_ui.status[0].load_balancer[0].ingress[0].hostname, "ALB not created yet")
+
 }

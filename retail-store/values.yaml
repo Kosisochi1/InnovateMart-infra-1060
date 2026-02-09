@@ -1,0 +1,16 @@
+CARTS: carts
+CATALOG: catalog
+CHECKOUT: checkout
+ORDER: orders
+UI: ui
+CARTS_DYNAMODB: carts-dynamodb
+CATALOG_DYNAMODB: catalog-dynamodb
+CHECKOUT_REDIS: checkout-redis
+ORDER_DYNAMODB: orders-dynamodb
+ORDERS_DB: orders-db
+ORDERS_RABBITMQ: orders-rabbitmq
+CATALOG_DB: catalog-db
+CATALOG_MYSQL: catalog-mysql
+ORDERS_POSTGRESQL: orders-postgresql
+
+
