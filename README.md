@@ -284,6 +284,12 @@ GitHub Actions automates infrastructure deployment.
 | Merge to main | terraform apply |
 
 
+## Pipeline Trigger Instructions
+
+The CI/CD pipeline is configured using GitHub Actions and can be triggered in the following ways:
+* When a pull request is created from the main branch, the pipeline initailize terraform, validate and runs terraform plan.
+* When a pull request is merged to the main branch, the pipeline runs terraform apply to provission the Infrastructure.
+
 ### Security:
 
 * AWS credentials stored as GitHub Secrets
@@ -299,24 +305,17 @@ git clone repo
 cd terraform
 ```
 
-2. Login to GHCR from the terminal for helm chart pulling
-
-```
-helm registry login ghcr.io  --username <username>  --password <token>
-
-```
-
-3. Initialize Terraform
+2. Initialize Terraform
 ```
 terraform init
 ```
 
-4. Plan Infrastructure
+3. Plan Infrastructure
 ```
 terraform plan
 
 ```
-5. Apply Infrastructure
+4. Apply Infrastructure
 
 ```
 terraform apply
