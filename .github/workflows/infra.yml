@@ -119,6 +119,43 @@ jobs:
         run: |
           echo "📋 Infrastructure Outputs:"
           terraform output
+          
+  app-deploy:
+    name: Deploy Application to EKS
+    runs-on: ubuntu-latest
+    needs: terraform-apply
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ secrets.AWS_REGION }} \
+            --name $(terraform -chdir=terraform output -raw cluster_name)
+
+      - name: Deploy application with Helm
+        run: |
+          helm upgrade --install retail-app ./helm/retail-app \
+            --namespace retail-app \
+            --create-namespace \
+            --wait
+
 
 
 
