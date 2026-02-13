@@ -163,7 +163,7 @@ jobs:
 
      - name: Deploy application with Helm
        run: |
-        helm upgrade --install retail-app ./helm/retail-app \
+        helm upgrade --install retail-app ./retail-app \
           --namespace retail-app \
           --create-namespace \
           --wait
