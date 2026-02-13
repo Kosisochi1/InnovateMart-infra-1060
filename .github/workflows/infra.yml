@@ -163,7 +163,7 @@ jobs:
           --name $CLUSTER_NAME
 
      - name: Deploy application with Helm
-       working-directory: terraform
+      # working-directory: terraform
        run: |
         helm upgrade --install retail-app ./retail-store \
           --namespace retail-app \
