@@ -154,7 +154,7 @@ jobs:
        uses: azure/setup-kubectl@v4
 
      - name: Configure kubeconfig
-       working-directory: terraform
+       # working-directory: terraform
        run: |
         CLUSTER_NAME=$(terraform -chdir=terraform output -raw cluster_name)
 
@@ -171,7 +171,7 @@ jobs:
           --wait
 
 
-
+ 
 
 
   terraform-destroy:
