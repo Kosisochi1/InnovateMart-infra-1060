@@ -165,7 +165,7 @@ jobs:
      - name: Deploy application with Helm
        working-directory: terraform
        run: |
-        helm upgrade --install retail-app ./retail-app \
+        helm upgrade --install retail-app ./retail-store \
           --namespace retail-app \
           --create-namespace \
           --wait
