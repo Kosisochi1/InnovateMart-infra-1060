@@ -1,4 +1,4 @@
-./backend_s3/.gitignore
+../backend_s3/.gitignore
 **/.terraform/*
 *.tfstate
 *.tfstate.*
