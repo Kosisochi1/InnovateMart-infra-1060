@@ -24,7 +24,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "bedrock-tf-state-1060"
+    bucket         = "bedrock-tf-state-kosi-1060"
     key            = "project-bedrock/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "bedrock-tf-lock"
