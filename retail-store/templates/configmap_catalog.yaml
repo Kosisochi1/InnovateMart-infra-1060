@@ -4,5 +4,5 @@ metadata:
   name: catalog
 data:
   RETAIL_CATALOG_PERSISTENCE_PROVIDER: mysql
-  RETAIL_CATALOG_PERSISTENCE_ENDPOINT: catalog-mysql:3306
+  RETAIL_CATALOG_PERSISTENCE_ENDPOINT: mysql.ckhwacae67t8.us-east-1.rds.amazonaws.com:3306 #catalog-mysql:3306
   RETAIL_CATALOG_PERSISTENCE_DB_NAME: catalog
