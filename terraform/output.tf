@@ -27,10 +27,19 @@ output "cluster_name" {
 
 }
 
-output "dns" {
-  value = module.kubernetes.ingress
+output "dns_name" {
+  value = module.kubernetes.alb_dns_names
 
 }
+output "node_security_group_id" {
+  value = module.compute.eks_managed_node_groups
+}
+
+
+
+
+
+
 
 
 # output "ingress" {

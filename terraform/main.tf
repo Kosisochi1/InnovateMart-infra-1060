@@ -55,6 +55,11 @@ data "aws_eks_cluster_auth" "cluster" {
   depends_on = [module.compute.eks]
 }
 
+
+
+
+
+
 provider "kubernetes" {
   host = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(
