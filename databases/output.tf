@@ -11,7 +11,3 @@ output "dynamodb_table_name" {
 }
 
 
-# output "dynamo_endpoint" {
-#   value = aws_dynamodb_table.carts.
-
-# }
